@@ -1,0 +1,96 @@
+------------------
+------------------
+Part 1
+------------------
+------------------
+
+
+------------------
+echoserveri
+------------------
+
+1.	cgreenw5@parthenon:~/CS324/HW6/concurrency$ ps -Lo user,pid,ppid,nlwp,lwp,state,ucmd -C echoserveri | grep ^cgreenw5\\\|USER
+	USER         PID    PPID NLWP     LWP S CMD
+	cgreenw5  503363  503136    1  503363 S echoserveri
+	
+2.	There is one process and one thread running (the main thread). This is because the echoserveri doesn't use concurrency and so
+	there is only ever one connection to a client made at a time.
+	
+3.	When the first client is interrupted, the second client makes connection and sends its data to the server.
+
+------------------
+echoserverp
+------------------
+
+4.	cgreenw5@parthenon:~/CS324/HW6/concurrency$ ps -Lo user,pid,ppid,nlwp,lwp,state,ucmd -C echoserverp | grep ^cgreenw5\\\|USER
+	USER         PID    PPID NLWP     LWP S CMD
+	cgreenw5  508534  503136    1  508534 S echoserverp
+	cgreenw5  508564  508534    1  508564 S echoserverp
+	cgreenw5  508569  508534    1  508569 S echoserverp
+	cgreenw5  508578  508534    1  508578 S echoserverp
+	
+5.	There are 4 processes running, each with one main thread. This is because the server creates 3 processes to handle each client connection
+	and the parent process stays running.
+	
+------------------
+echoservert
+------------------
+
+6.	cgreenw5@parthenon:~/CS324/HW6/concurrency$ ps -Lo user,pid,ppid,nlwp,lwp,state,ucmd -C echoservert | grep ^cgreenw5\\\|USER
+	USER         PID    PPID NLWP     LWP S CMD
+	cgreenw5  512386  503136    4  512386 S echoservert
+	cgreenw5  512386  503136    4  512400 S echoservert
+	cgreenw5  512386  503136    4  512417 S echoservert
+	cgreenw5  512386  503136    4  512422 S echoservert
+	
+7.	There is only one process (512386) but since this server creates threads for each client connection, there are 4 threads in total.
+	One is the main thread, then 3 are for the client connections.
+	
+------------------
+echoservert_pre
+------------------
+
+8.	cgreenw5@parthenon:~/CS324/HW6/concurrency$ ps -Lo user,pid,ppid,nlwp,lwp,state,ucmd -C echoservert_pre | grep ^cgreenw5\\\|USER
+	USER         PID    PPID NLWP     LWP S CMD
+	cgreenw5  547444  547330   11  547444 S echoservert_pre
+	cgreenw5  547444  547330   11  547445 S echoservert_pre
+	cgreenw5  547444  547330   11  547446 S echoservert_pre
+	cgreenw5  547444  547330   11  547447 S echoservert_pre
+	cgreenw5  547444  547330   11  547448 S echoservert_pre
+	cgreenw5  547444  547330   11  547449 S echoservert_pre
+	cgreenw5  547444  547330   11  547450 S echoservert_pre
+	cgreenw5  547444  547330   11  547451 S echoservert_pre
+	cgreenw5  547444  547330   11  547452 S echoservert_pre
+	cgreenw5  547444  547330   11  547453 S echoservert_pre
+	cgreenw5  547444  547330   11  547454 S echoservert_pre
+	
+9.	There is one process with 11 threads, including the main thread. The 10 LWP threads are constantly waiting to process client connections.
+
+
+------------------
+------------------
+Part 5
+------------------
+------------------
+
+10.	Echoserverp
+		Pro: Simplest way to do concurrency
+		Con: Computationally and resource intensive
+		
+11.	Echoservert
+		Pro: Multiple threads run in the context of a single process, and thus they share the entire contents of the process virtual address space.
+		Con: Two threads can "stomp" on each other's shared variables and create errors if not careful.
+		
+12.	Echoservert_pre:
+		Pro: Programs can be designed in the Producer/Consumer structure
+		Con: Programming such an approach can become highly complicated
+		
+13.	The main function encompasses the procuder role. There is only one producer thread.
+
+14.	The *thread() function encompasses the consumer role. 10 consumer threads are initialized in the main thread.
+
+15.	At line 29, if the value of slots is 0, then the thread will stop execution and wait for an available slot to be posted so an item can be inserted into the buffer.
+
+16.	The line 33 ("sem_post(&sp->items);") will be executed by the producer to announce to the consumers that an item is available.
+
+17.	
